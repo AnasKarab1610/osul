@@ -1,0 +1,187 @@
+/* =========================================
+   1. VARIABLES & RESET
+   ========================================= */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&family=Tajawal:wght@400;500;700&family=Reem+Kufi:wght@700&display=swap');
+
+:root {
+    --bg-color: #1a1512;
+    --text-color: #f5f5dc;
+    --accent-color: #d4a373;
+    --card-bg: #2b221e;
+    --font-heading: 'Cairo', sans-serif;
+    --font-body: 'Tajawal', sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: var(--font-body);
+    line-height: 1.6;
+    direction: rtl; /* للتأكد من الاتجاه العربي */
+}
+
+/* =========================================
+   2. HERO SECTION
+   ========================================= */
+.hero {
+    background: linear-gradient(rgba(26,21,18,0.5), rgba(26,21,18,0.5)), url('background.png') no-repeat center center/cover;
+    height: 40vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.hero-content h1 {
+    font-family: 'Reem Kufi', sans-serif;
+    font-weight: 700;
+    font-size: 6rem;
+    color: #8c5d3b;
+    /* شادو خفيف وناعم لإبراز الاسم */
+    text-shadow: 4px 4px 15px rgba(0,0,0,0.7);
+    margin-bottom: 0;
+    line-height: 1.2;
+}
+
+.hero-content p {
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 1.4rem;
+    color: #f5f5dc;
+    /* شادو خفيف للوصف */
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
+    letter-spacing: 1px;
+    opacity: 0.95;
+}
+
+/* =========================================
+   3. LAYOUT & TYPOGRAPHY
+   ========================================= */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 3rem 1rem;
+}
+
+.section-title {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.section-title h2 {
+    color: var(--accent-color);
+    font-family: var(--font-heading);
+    font-size: 2.2rem;
+    margin-bottom: 0.5rem;
+}
+
+/* =========================================
+   4. BUTTONS
+   ========================================= */
+.filter-buttons {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.btn {
+    background: transparent;
+    border: 1px solid var(--accent-color);
+    color: var(--accent-color);
+    padding: 10px 25px;
+    cursor: pointer;
+    font-family: var(--font-heading);
+    transition: 0.3s;
+    border-radius: 2px;
+}
+
+.btn:hover, .btn.active {
+    background: var(--accent-color);
+    color: var(--bg-color);
+}
+
+.sub-filters .btn {
+    font-size: 0.9rem;
+    padding: 8px 20px;
+    border-color:#6e5140;
+    color: #6e5140;
+}
+
+.sub-filters .btn:hover, .sub-filters .btn.active {
+    background: #6e5140;
+    color: #ffffff;
+}
+
+.hidden { display: none; }
+
+/* =========================================
+   5. GALLERY GRID
+   ========================================= */
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.gallery-item {
+    background: var(--card-bg);
+    border-radius: 4px;
+    overflow: hidden;
+    aspect-ratio: 4/3;
+    cursor: pointer;
+    animation: fadeInUp 0.5s forwards;
+}
+
+.gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.gallery-item:hover img {
+    transform: scale(1.05);
+}
+
+@keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+
+/* =========================================
+   6. MODAL & WHATSAPP
+   ========================================= */
+.modal {
+    display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; 
+    background-color: rgba(0,0,0,0.95); overflow: hidden;
+}
+.modal-wrapper { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; overflow: hidden; cursor: grab; }
+.modal-content { max-width: 90%; max-height: 90%; box-shadow: 0 0 30px rgba(0,0,0,0.8); }
+.close { position: absolute; top: 20px; right: 35px; color: #f1f1f1; font-size: 40px; cursor: pointer; z-index: 1001; background: rgba(0,0,0,0.5); width: 50px; height: 50px; text-align: center; line-height: 50px; border-radius: 50%; }
+
+.whatsapp-float { position: fixed; bottom: 25px; right: 25px; width: 50px; height: 50px; z-index: 2000; border-radius: 50%; box-shadow: 2px 2px 10px rgba(0,0,0,0.5); cursor: pointer; transition: 0.3s; }
+.whatsapp-float img { width: 100%; height: 100%; object-fit: cover; }
+
+/* =========================================
+   7. MOBILE RESPONSIVENESS (UPDATED)
+   ========================================= */
+@media (max-width: 768px) {
+    .hero { height: 35vh; }
+    
+    .hero-content h1 {
+        font-size: 3.5rem; /* حجم مناسب للموبايل */
+        text-shadow: 3px 3px 10px rgba(0,0,0,0.8);
+    }
+
+    /* 👇 تعديل الموبايل: صورة واحدة في الصف 👇 */
+    .gallery-grid {
+        grid-template-columns: 1fr; 
+        gap: 15px;
+    }
+
+    .section-title h2 { font-size: 1.8rem; }
+    .whatsapp-float { bottom: 20px; right: 20px; }
+}
+
+footer { text-align: center; padding: 1.5rem; background: #110e0c; color: #777; font-size: 0.9rem; }
