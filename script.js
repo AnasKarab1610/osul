@@ -12,9 +12,11 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentImagesList = [];
   let swiperInstance = null;
 
-  // 👇 1. الترتيب اليدوي للأقسام (عدل هنا براحتك)
-  // الأقسام اللي بتنكتب هون بتطلع بالأول وبنفس الترتيب
-  // أي قسم في الداتا ومو مكتوب هون، بيطلع بالأخير
+  // متغيرات لحساب السحب للأسفل (ميزة جديدة)
+  let touchStartY = 0;
+  let touchEndY = 0;
+
+  // 1. الترتيب اليدوي للأقسام
   const categoryOrder = [
     "تجاليد",
     "دواليب",
@@ -37,32 +39,24 @@ document.addEventListener("DOMContentLoaded", () => {
       initCategories();
     });
 
-  // 3. Initialize Categories (مع الترتيب المخصص)
+  // 3. Initialize Categories
   function initCategories() {
-    // نجيب كل المفاتيح من الداتا
     let categories = Object.keys(galleryData);
 
-    // دالة الترتيب السحرية
     categories.sort((a, b) => {
       let indexA = categoryOrder.indexOf(a);
       let indexB = categoryOrder.indexOf(b);
-
-      // إذا العنصر غير موجود في القائمة، نعطيه رقم كبير عشان يروح للأخير
       if (indexA === -1) indexA = 999;
       if (indexB === -1) indexB = 999;
-
       return indexA - indexB;
     });
 
-    // إنشاء الأزرار بناءً على الترتيب الجديد
     categories.forEach((cat, index) => {
       const btn = document.createElement("button");
       btn.className = "btn";
       btn.textContent = cat;
       btn.onclick = () => selectCategory(cat, btn);
       categoryContainer.appendChild(btn);
-
-      // تفعيل أول زر تلقائياً
       if (index === 0) btn.click();
     });
   }
@@ -74,27 +68,27 @@ document.addEventListener("DOMContentLoaded", () => {
       .querySelectorAll("#category-container .btn")
       .forEach((b) => b.classList.remove("active"));
     btnElement.classList.add("active");
-
-    // استدعاء دالة الأقسام الفرعية (موجودة وشغالة 100%)
     renderSubCategories(category);
   }
 
-  // 5. Render Subcategories (الأقسام الفرعية)
+  // 5. Render Subcategories
   function renderSubCategories(category) {
     subCategoryContainer.innerHTML = "";
-
     subCategoryContainer.classList.remove("hidden");
-    // زر "الكل"
+
     const allBtn = document.createElement("button");
     allBtn.className = "btn active";
     allBtn.textContent = "الكل";
     allBtn.onclick = () => filterImages("All", allBtn);
     subCategoryContainer.appendChild(allBtn);
 
-    // جلب المفاتيح الفرعية من الداتا
     if (galleryData[category]) {
-      Object.keys(galleryData[category]).forEach((sub) => {
-        // تجاهل أي مفتاح يبدأ بـ _ (مثل الإعدادات لو وجد)
+      let subCategories = Object.keys(galleryData[category]);
+
+      // 👇 إضافة الترتيب الرقمي الذكي (1, 2, 10)
+      subCategories.sort(new Intl.Collator("ar", { numeric: true }).compare);
+
+      subCategories.forEach((sub) => {
         if (!sub.startsWith("_")) {
           const btn = document.createElement("button");
           btn.className = "btn";
@@ -105,7 +99,6 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    // تحميل صور "الكل" كبداية
     loadImages(category, "All");
   }
 
@@ -115,7 +108,6 @@ document.addEventListener("DOMContentLoaded", () => {
       .querySelectorAll("#subcategory-container .btn")
       .forEach((b) => b.classList.remove("active"));
     btnElement.classList.add("active");
-
     loadImages(currentCategory, subCategory);
   }
 
@@ -124,7 +116,6 @@ document.addEventListener("DOMContentLoaded", () => {
     galleryGrid.innerHTML = "";
     currentImagesList = [];
 
-    // تجميع الصور حسب الاختيار
     if (subCategory === "All") {
       Object.values(galleryData[category]).forEach((imgs) => {
         currentImagesList = currentImagesList.concat(imgs);
@@ -133,31 +124,26 @@ document.addEventListener("DOMContentLoaded", () => {
       currentImagesList = galleryData[category][subCategory];
     }
 
-    // إنشاء العناصر في الـ Grid
     currentImagesList.forEach((imgSrc, index) => {
       const div = document.createElement("div");
       div.className = "gallery-item";
-
       const img = document.createElement("img");
       img.src = imgSrc;
       img.setAttribute("loading", "lazy");
 
-      // فحص الأبعاد لتحديد (Wide) و (Tall)
       img.onload = function () {
         const width = this.naturalWidth;
         const height = this.naturalHeight;
         const aspectRatio = width / height;
 
         if (aspectRatio > 1.3) {
-          div.classList.add("wide"); // عريض
+          div.classList.add("wide");
         } else if (aspectRatio < 0.8) {
-          div.classList.add("tall"); // طويل
+          div.classList.add("tall");
         }
       };
 
-      // عند الضغط نفتح المودال
       div.onclick = () => openSwiperModal(index);
-
       div.appendChild(img);
       galleryGrid.appendChild(div);
     });
@@ -165,7 +151,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- SWIPER MODAL CONFIGURATION ---
   function openSwiperModal(startIndex) {
-    // منع سكرول الصفحة الخلفية
+    // 👇 1. تسجيل نقطة في التاريخ عشان زر الرجوع يشتغل
+    history.pushState({ modalOpen: true }, "", "#view");
+
     document.body.classList.add("no-scroll");
     modal.style.display = "block";
 
@@ -176,58 +164,101 @@ document.addEventListener("DOMContentLoaded", () => {
     const swiperWrapper = document.querySelector(".swiper-wrapper");
     swiperWrapper.innerHTML = "";
 
-    // بناء السلايدات
     currentImagesList.forEach((src) => {
       const slide = document.createElement("div");
       slide.className = "swiper-slide";
-      // إضافة حاوية الزوم
       slide.innerHTML = `<div class="swiper-zoom-container"><img src="${src}"></div>`;
       swiperWrapper.appendChild(slide);
     });
 
-    // إعدادات Swiper (تم إزالة زوم البكرة)
     swiperInstance = new Swiper(".mySwiper", {
       initialSlide: startIndex,
       spaceBetween: 30,
-
-      // التعديل: تفعيل البكرة للتنقل بين الصور فقط (Next/Prev)
-      // إذا ما بدك البكرة تعمل شي نهائياً، احذف هذا الجزء
       mousewheel: {
         forceToAxis: true,
       },
-
       navigation: {
         nextEl: ".swiper-button-next",
         prevEl: ".swiper-button-prev",
       },
-
-      // إعدادات الزوم: دبل كليك أو Pinch فقط
       zoom: {
         maxRatio: 5,
         minRatio: 1,
-        toggle: true, // يسمح بالدبل كليك
+        toggle: true,
       },
-
       keyboard: {
         enabled: true,
       },
     });
   }
 
-  function closeModal() {
+  // --- دالة إخفاء الواجهة فقط (بدون منطق الرجوع) ---
+  function hideModalUI() {
     document.body.classList.remove("no-scroll");
     modal.style.display = "none";
   }
 
-  closeBtn.onclick = closeModal;
+  // --- مستمع لزر الرجوع في الموبايل والمتصفح ---
+  window.addEventListener("popstate", (event) => {
+    // لما اليوزر يكبس رجوع، المتصفح بيشغل هذا الحدث
+    hideModalUI();
+  });
+
+  // --- دالة طلب الإغلاق (تحاكي زر الرجوع) ---
+  function requestClose() {
+    // بدل ما نقفل فوراً، بنرجع خطوة لورا في الهيستوري
+    // وهاد أوتوماتيكياً رح يشغل الـ popstate ويقفل المودال
+    if (history.state && history.state.modalOpen) {
+      history.back();
+    } else {
+      hideModalUI();
+    }
+  }
+
+  // ربط أزرار الإغلاق بالدالة الجديدة
+  closeBtn.onclick = requestClose;
 
   modal.onclick = (e) => {
     if (e.target.classList.contains("swiper") || e.target === modal) {
-      closeModal();
+      requestClose();
     }
   };
 
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") closeModal();
+    if (e.key === "Escape") requestClose();
   });
+
+  // --- ميزة السحب للأسفل للإغلاق (Swipe Down Logic) ---
+
+  modal.addEventListener(
+    "touchstart",
+    (e) => {
+      // تسجيل نقطة بداية اللمس
+      touchStartY = e.changedTouches[0].screenY;
+    },
+    { passive: true }
+  );
+
+  modal.addEventListener(
+    "touchend",
+    (e) => {
+      // تسجيل نقطة نهاية اللمس
+      touchEndY = e.changedTouches[0].screenY;
+      handleSwipeGesture();
+    },
+    { passive: true }
+  );
+
+  function handleSwipeGesture() {
+    // حساب المسافة
+    const swipeDistance = touchEndY - touchStartY;
+
+    // التأكد إننا مش عاملين زوم (عشان ما يقفل وأنت بتتحرك جوا الصورة)
+    const isZoomed = swiperInstance && swiperInstance.zoom.scale > 1;
+
+    // الشرط: سحب للأسفل أكثر من 100 بكسل + مفيش زوم
+    if (swipeDistance > 100 && !isZoomed) {
+      requestClose(); // استدعاء دالة الإغلاق
+    }
+  }
 });
