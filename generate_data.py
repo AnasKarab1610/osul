@@ -1,13 +1,16 @@
 import os
 import json
+import re
 
 # Configuration
 IMAGE_ROOT = 'images'
 OUTPUT_FILE = 'data.json'
 VALID_EXTENSIONS = ('.jpg', '.jpeg', '.png', '.webp')
-# Files found directly in category folders go here. 
-# The underscore (_) tells the JS to NOT make a button for it.
 UNCATEGORIZED_KEY = '_uncategorized' 
+
+# 👇 دالة الترتيب السحرية (تفرق بين النص والرقم)
+def natural_sort_key(s):
+    return [int(text) if text.isdigit() else text.lower() for text in re.split('([0-9]+)', s)]
 
 def generate_image_data():
     gallery_data = {}
@@ -16,21 +19,29 @@ def generate_image_data():
         print(f"Error: Folder '{IMAGE_ROOT}' not found.")
         return
 
-    # Walk through the directory: images/Category/
-    for category in os.listdir(IMAGE_ROOT):
+    # 1. جلب الأقسام وترتيبها
+    categories = sorted(os.listdir(IMAGE_ROOT), key=natural_sort_key)
+
+    for category in categories:
         cat_path = os.path.join(IMAGE_ROOT, category)
         
         if os.path.isdir(cat_path):
             gallery_data[category] = {}
             loose_images = []
 
-            for item in os.listdir(cat_path):
+            # 2. جلب العناصر داخل القسم وترتيبها
+            items = sorted(os.listdir(cat_path), key=natural_sort_key)
+
+            for item in items:
                 item_path = os.path.join(cat_path, item)
                 
-                # Case 1: Subfolder (Room1, Room2) -> These get buttons
+                # Case 1: Subfolder -> These get buttons
                 if os.path.isdir(item_path):
                     images = []
-                    for filename in os.listdir(item_path):
+                    # 3. جلب الصور داخل المجلد الفرعي وترتيبها
+                    files = sorted(os.listdir(item_path), key=natural_sort_key)
+                    
+                    for filename in files:
                         if filename.lower().endswith(VALID_EXTENSIONS):
                             rel_path = f"{IMAGE_ROOT}/{category}/{item}/{filename}"
                             images.append(rel_path)
@@ -38,7 +49,7 @@ def generate_image_data():
                     if images:
                         gallery_data[category][item] = images
 
-                # Case 2: Loose File -> These go to 'All' but get NO button
+                # Case 2: Loose File -> These go to 'All'
                 elif item.lower().endswith(VALID_EXTENSIONS):
                     rel_path = f"{IMAGE_ROOT}/{category}/{item}"
                     loose_images.append(rel_path)
@@ -47,9 +58,9 @@ def generate_image_data():
                 gallery_data[category][UNCATEGORIZED_KEY] = loose_images
 
     with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
-        json.dump(gallery_data, f, indent=4)
+        json.dump(gallery_data, f, indent=4, ensure_ascii=False)
     
-    print(f"Success! '{OUTPUT_FILE}' updated.")
+    print(f"Success! '{OUTPUT_FILE}' created with correct sorting.")
 
 if __name__ == "__main__":
     generate_image_data()

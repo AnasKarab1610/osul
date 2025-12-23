@@ -10,6 +10,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400;700&display=swap" rel="stylesheet">
     <meta name="description" content="أصول للأعمال الخشبية والديكور - متخصصون في تجاليد الحوائط الخشبية، غرف النوم، المطابخ والموبيليا المودرن والكلاسيك بأعلى دقة تنفيذ.">
     <meta name="keywords" content="أصول, ورشة أصول, Osul, Osul Woodworking, Osul Decorations, تجاليد خشب, تجاليد حوائط, نجار موبيليا, مطابخ عمولة, Woodworking Egypt, Custom Furniture">    <meta property="og:title" content="أصول للأعمال الخشبية والديكور">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+		<link rel="icon" type="image/png" href="logo.png">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
@@ -25,22 +28,77 @@
         <div id="subcategory-container" class="filter-buttons sub-filters hidden"></div>
         <div id="gallery-grid" class="gallery-grid"></div>
     </main>
-
-  <footer>
-    <p>&copy; 2025 أصول للأعمال الخشبية. جميع الحقوق محفوظة.</p>
-  </footer>
-
-    <div id="modal" class="modal">
-        <span class="close">&times;</span>
-        <div class="modal-wrapper" id="panzoom-container">
-            <img class="modal-content" id="modal-img">
-        </div>
-    </div>
+<div id="modal" class="modal">
+    <span class="close" style="z-index: 9999;">&times;</span>
     
-  <a href="https://wa.me/201286111358" class="whatsapp-float" target="_blank">
-      <img src="whatsapp-icon.png">
-  </a>
-    <script src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
+    <div class="swiper mySwiper">
+        <div class="swiper-wrapper">
+            </div>
+        <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev"></div>
+    </div>
+</div>
+    
+<a href="https://wa.me/201286111358" class="whatsapp-float" target="_blank">
+    <img src="whatsapp-icon.png">
+</a>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script src="script.js"></script>
 </body>
+<footer class="site-footer">
+    <div class="footer-container">
+        
+        <div class="footer-col about">
+            <h3>أُصُــول</h3>
+            <p>متخصصون في تجاليد الحوائط الخشبية، غرف النوم، المطابخ والموبيليا المودرن والكلاسيك بأعلى دقة تنفيذ.</p>
+            <div class="social-links">
+                <a href="#"><i class="fab fa-facebook-f"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-tiktok"></i></a>
+            </div>
+        </div>
+
+        <div class="footer-col links">
+            <h3>أقسامنا</h3>
+            <ul>
+                <li><a href="#" onclick="document.querySelector('#category-container button:nth-child(1)').click()">التجاليد</a></li>
+                <li><a href="#" onclick="document.querySelector('#category-container button:nth-child(2)').click()">دواليب</a></li>
+                <li><a href="#" onclick="document.querySelector('#category-container button:nth-child(3)').click()">غرف نوم</a></li>
+                <li><a href="#" onclick="document.querySelector('#category-container button:nth-child(8)').click()">ابواب</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-col contact">
+            <h3>تواصل معنا</h3>
+            <ul>
+                <li>
+                    <a href="tel:+201286111358">
+                        <i class="fas fa-phone-alt"></i> 01286111358
+                    </a>
+                </li>
+                
+                <li>
+                    <a href="https://www.google.com/maps/search/?api=1&query=6+October+City+Giza+Egypt" target="_blank">
+                        <i class="fas fa-map-marker-alt"></i> 6 أكتوبر، الجيزة، مصر
+                    </a>
+                </li>
+                
+                <li>	
+                    <a href="mailto:info@osul.online">
+                        <i class="fas fa-envelope"></i> info@osul.online
+                    </a>
+                </li>
+                
+                <li style="color: #e0d0b8;">
+                    <i class="fas fa-clock"></i> يومياً  
+                </li>
+            </ul>
+        </div>
+
+    </div>
+
+    <div class="footer-bottom">
+        <p>جميع الحقوق محفوظة &copy; 2025 <span class="gold-text">أصول للأعمال الخشبية</span></p>
+    </div>
+</footer>
 </html>

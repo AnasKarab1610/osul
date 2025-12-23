@@ -4,161 +4,229 @@ document.addEventListener("DOMContentLoaded", () => {
   const subCategoryContainer = document.getElementById("subcategory-container");
   const galleryGrid = document.getElementById("gallery-grid");
   const modal = document.getElementById("modal");
-  const modalImg = document.getElementById("modal-img");
-  const modalWrapper = document.getElementById("panzoom-container"); // The wrapper
   const closeBtn = document.querySelector(".close");
 
-  // Data State
+  // State
   let galleryData = {};
   let currentCategory = null;
-  let panzoomInstance = null; // Store the zoom engine instance
+  let currentImagesList = [];
+  let swiperInstance = null;
 
-  // 1. Fetch Data
+  // 👇 1. الترتيب اليدوي للأقسام (عدل هنا براحتك)
+  // الأقسام اللي بتنكتب هون بتطلع بالأول وبنفس الترتيب
+  // أي قسم في الداتا ومو مكتوب هون، بيطلع بالأخير
+  const categoryOrder = [
+    "تجاليد",
+    "دواليب",
+    "غرفة نوم",
+    "علب حمامات",
+    "مكتب",
+    "وحدة السلم",
+    "وحدة تلفاز",
+    "ابواب",
+    "صالة",
+    "طاولة",
+    "علب حائط",
+  ];
+
+  // 2. Fetch Data
   fetch("data.json")
-    .then((response) => {
-      if (!response.ok) throw new Error("Load failed.");
-      return response.json();
-    })
+    .then((response) => response.json())
     .then((data) => {
       galleryData = data;
       initCategories();
-    })
-    .catch((err) => console.error(err));
+    });
 
-  // 2. Initialize Main Categories
+  // 3. Initialize Categories (مع الترتيب المخصص)
   function initCategories() {
-    const categories = Object.keys(galleryData);
+    // نجيب كل المفاتيح من الداتا
+    let categories = Object.keys(galleryData);
+
+    // دالة الترتيب السحرية
+    categories.sort((a, b) => {
+      let indexA = categoryOrder.indexOf(a);
+      let indexB = categoryOrder.indexOf(b);
+
+      // إذا العنصر غير موجود في القائمة، نعطيه رقم كبير عشان يروح للأخير
+      if (indexA === -1) indexA = 999;
+      if (indexB === -1) indexB = 999;
+
+      return indexA - indexB;
+    });
+
+    // إنشاء الأزرار بناءً على الترتيب الجديد
     categories.forEach((cat, index) => {
       const btn = document.createElement("button");
       btn.className = "btn";
       btn.textContent = cat;
       btn.onclick = () => selectCategory(cat, btn);
       categoryContainer.appendChild(btn);
+
+      // تفعيل أول زر تلقائياً
       if (index === 0) btn.click();
     });
   }
 
-  // 3. Select Main Category
+  // 4. Select Main Category
   function selectCategory(category, btnElement) {
     currentCategory = category;
     document
       .querySelectorAll("#category-container .btn")
       .forEach((b) => b.classList.remove("active"));
     btnElement.classList.add("active");
+
+    // استدعاء دالة الأقسام الفرعية (موجودة وشغالة 100%)
     renderSubCategories(category);
   }
 
-  // 4. Render Subcategories
+  // 5. Render Subcategories (الأقسام الفرعية)
   function renderSubCategories(category) {
     subCategoryContainer.innerHTML = "";
-    subCategoryContainer.classList.remove("hidden");
 
+    subCategoryContainer.classList.remove("hidden");
+    // زر "الكل"
     const allBtn = document.createElement("button");
     allBtn.className = "btn active";
     allBtn.textContent = "الكل";
     allBtn.onclick = () => filterImages("All", allBtn);
     subCategoryContainer.appendChild(allBtn);
 
-    const subCats = Object.keys(galleryData[category]);
-    subCats.forEach((sub) => {
-      if (!sub.startsWith("_")) {
-        const btn = document.createElement("button");
-        btn.className = "btn";
-        btn.textContent = sub;
-        btn.onclick = () => filterImages(sub, btn);
-        subCategoryContainer.appendChild(btn);
-      }
-    });
+    // جلب المفاتيح الفرعية من الداتا
+    if (galleryData[category]) {
+      Object.keys(galleryData[category]).forEach((sub) => {
+        // تجاهل أي مفتاح يبدأ بـ _ (مثل الإعدادات لو وجد)
+        if (!sub.startsWith("_")) {
+          const btn = document.createElement("button");
+          btn.className = "btn";
+          btn.textContent = sub;
+          btn.onclick = () => filterImages(sub, btn);
+          subCategoryContainer.appendChild(btn);
+        }
+      });
+    }
 
+    // تحميل صور "الكل" كبداية
     loadImages(category, "All");
   }
 
-  // 5. Filter Images
+  // 6. Filter Images
   function filterImages(subCategory, btnElement) {
     document
       .querySelectorAll("#subcategory-container .btn")
       .forEach((b) => b.classList.remove("active"));
     btnElement.classList.add("active");
+
     loadImages(currentCategory, subCategory);
   }
 
-  // 6. Load Images
+  // 7. Load Images into Grid
   function loadImages(category, subCategory) {
     galleryGrid.innerHTML = "";
-    let imagesToShow = [];
+    currentImagesList = [];
 
+    // تجميع الصور حسب الاختيار
     if (subCategory === "All") {
       Object.values(galleryData[category]).forEach((imgs) => {
-        imagesToShow = imagesToShow.concat(imgs);
+        currentImagesList = currentImagesList.concat(imgs);
       });
     } else {
-      imagesToShow = galleryData[category][subCategory];
+      currentImagesList = galleryData[category][subCategory];
     }
 
-    if (imagesToShow) {
-      imagesToShow.forEach((imgSrc, index) => {
-        const div = document.createElement("div");
-        div.className = "gallery-item";
-        div.style.animationDelay = `${index * 0.05}s`;
+    // إنشاء العناصر في الـ Grid
+    currentImagesList.forEach((imgSrc, index) => {
+      const div = document.createElement("div");
+      div.className = "gallery-item";
 
-        const img = document.createElement("img");
-        img.src = imgSrc;
+      const img = document.createElement("img");
+      img.src = imgSrc;
+      img.setAttribute("loading", "lazy");
 
-        // 👇 التعديل هنا لسرعة الصاروخ
-        img.setAttribute("loading", "lazy"); // لا يحمل الصورة إلا لما تقرب منها
-        img.alt = `أصول لتنفيذ الخشب - ${currentCategory}`; // مهم جداً لجوجل (SEO)
+      // فحص الأبعاد لتحديد (Wide) و (Tall)
+      img.onload = function () {
+        const width = this.naturalWidth;
+        const height = this.naturalHeight;
+        const aspectRatio = width / height;
 
-        div.onclick = () => openModal(imgSrc);
+        if (aspectRatio > 1.3) {
+          div.classList.add("wide"); // عريض
+        } else if (aspectRatio < 0.8) {
+          div.classList.add("tall"); // طويل
+        }
+      };
 
-        div.appendChild(img);
-        galleryGrid.appendChild(div);
-      });
-    }
+      // عند الضغط نفتح المودال
+      div.onclick = () => openSwiperModal(index);
+
+      div.appendChild(img);
+      galleryGrid.appendChild(div);
+    });
   }
 
-  // --- NEW MODAL LOGIC WITH PANZOOM LIBRARY ---
+  // --- SWIPER MODAL CONFIGURATION ---
+  function openSwiperModal(startIndex) {
+    // منع سكرول الصفحة الخلفية
+    document.body.classList.add("no-scroll");
+    modal.style.display = "block";
 
-  function openModal(src) {
-    modal.style.display = "block"; // Use block to ensure layout calculation
-    modalImg.src = src;
+    if (swiperInstance) {
+      swiperInstance.destroy(true, true);
+    }
 
-    // Initialize Panzoom
-    // This handles the math for pinch (mobile) and drag (desktop)
-    panzoomInstance = Panzoom(modalImg, {
-      maxScale: 5, // Maximum zoom (5x)
-      minScale: 0.5, // Minimum zoom
-      contain: false, // Allow free movement
+    const swiperWrapper = document.querySelector(".swiper-wrapper");
+    swiperWrapper.innerHTML = "";
+
+    // بناء السلايدات
+    currentImagesList.forEach((src) => {
+      const slide = document.createElement("div");
+      slide.className = "swiper-slide";
+      // إضافة حاوية الزوم
+      slide.innerHTML = `<div class="swiper-zoom-container"><img src="${src}"></div>`;
+      swiperWrapper.appendChild(slide);
     });
 
-    // Enable Mouse Wheel Zoom
-    // The library creates a helper function for this specific task
-    modalWrapper.addEventListener("wheel", panzoomInstance.zoomWithWheel);
+    // إعدادات Swiper (تم إزالة زوم البكرة)
+    swiperInstance = new Swiper(".mySwiper", {
+      initialSlide: startIndex,
+      spaceBetween: 30,
+
+      // التعديل: تفعيل البكرة للتنقل بين الصور فقط (Next/Prev)
+      // إذا ما بدك البكرة تعمل شي نهائياً، احذف هذا الجزء
+      mousewheel: {
+        forceToAxis: true,
+      },
+
+      navigation: {
+        nextEl: ".swiper-button-next",
+        prevEl: ".swiper-button-prev",
+      },
+
+      // إعدادات الزوم: دبل كليك أو Pinch فقط
+      zoom: {
+        maxRatio: 5,
+        minRatio: 1,
+        toggle: true, // يسمح بالدبل كليك
+      },
+
+      keyboard: {
+        enabled: true,
+      },
+    });
   }
 
   function closeModal() {
+    document.body.classList.remove("no-scroll");
     modal.style.display = "none";
-
-    // Clean up: Destroy the instance to reset position and scale completely
-    if (panzoomInstance) {
-      // Remove the wheel listener
-      modalWrapper.removeEventListener("wheel", panzoomInstance.zoomWithWheel);
-      // Destroy instance
-      panzoomInstance.destroy();
-      panzoomInstance = null;
-    }
   }
 
-  // Close Button
   closeBtn.onclick = closeModal;
 
-  // Close on click outside (only if clicking the dark background, not the image)
-  modal.onclick = (event) => {
-    if (event.target === modal || event.target === modalWrapper) {
+  modal.onclick = (e) => {
+    if (e.target.classList.contains("swiper") || e.target === modal) {
       closeModal();
     }
   };
 
-  // Escape Key
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeModal();
   });
