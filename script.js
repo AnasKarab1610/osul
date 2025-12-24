@@ -52,7 +52,11 @@ document.addEventListener("DOMContentLoaded", () => {
       const btn = document.createElement("button");
       btn.className = "btn";
       btn.textContent = cat;
-      btn.onclick = () => selectCategory(cat, btn);
+      btn.onclick = () => {
+        selectCategory(cat, btn);
+        scrollToVHResponsive(25, 40);//////////////////
+      };
+
       categoryContainer.appendChild(btn);
       if (index === 0) btn.click();
     });
@@ -76,25 +80,42 @@ document.addEventListener("DOMContentLoaded", () => {
     const allBtn = document.createElement("button");
     allBtn.className = "btn active";
     allBtn.textContent = "الكل";
-    allBtn.onclick = () => filterImages("All", allBtn);
+    allBtn.onclick = () => {
+      filterImages("All", allBtn);
+      scrollToVHResponsive(25, 40);///////////////////////////////
+    };
     subCategoryContainer.appendChild(allBtn);
-
     if (galleryData[category]) {
       let subCategories = Object.keys(galleryData[category]);
       subCategories.sort(new Intl.Collator("ar", { numeric: true }).compare);
-
       subCategories.forEach((sub) => {
         if (!sub.startsWith("_")) {
           const btn = document.createElement("button");
           btn.className = "btn";
           btn.textContent = sub;
-          btn.onclick = () => filterImages(sub, btn);
+          btn.onclick = () => {
+            filterImages(sub, btn);
+            scrollToVHResponsive(25, 40);///////////////////////////////////////////
+          };
+
           subCategoryContainer.appendChild(btn);
         }
       });
     }
     loadImages(category, "All");
   }
+
+function scrollToVHResponsive(mobileVH, desktopVH) {
+  const isMobile = window.matchMedia("(max-width: 767px)").matches;
+
+  const vh = window.visualViewport?.height || window.innerHeight;
+
+  window.scrollTo({
+    top: vh * ((isMobile ? mobileVH : desktopVH) / 100),
+    behavior: "smooth",
+  });
+}
+
 
   // 6. Filter Images
   function filterImages(subCategory, btnElement) {
@@ -218,4 +239,14 @@ document.addEventListener("DOMContentLoaded", () => {
       requestClose();
     }
   }
+  // --- Scroll to Top Arrow ---
+  const arrow = document.getElementById("scrollTopArrow");
+
+  window.addEventListener("scroll", () => {
+    arrow.style.display = window.scrollY > 500 ? "flex" : "none";
+  });
+
+  arrow.addEventListener("click", () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
 });
