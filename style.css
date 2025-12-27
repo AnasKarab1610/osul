@@ -268,45 +268,6 @@ body.no-scroll {
 /* =========================================
    8. SCROLL TO TOP ARROW
    ========================================= */
-
-/* #scrollTopArrow {
-  position: fixed;
-  bottom: 7px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60%;
-  height: 35px;
-  display: none;
-  z-index: 999;
-  cursor: pointer;
-  box-sizing: border-box;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  background: rgba(255,255,255,0.25);
-  border-radius: 20px;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-
-.arrow-svg {
-  width: 100%;
-  height: 100%;
-  padding: 0 18px;     
-  box-sizing: border-box;
-}
-
-
-.arrow-svg path {
-  fill: none;
-  stroke: rgba(0,0,0,0.85);
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-} */
-/* === تنسيق زر الصعود (الكونتينر الأساسي) === */
 /* === تنسيق زر الصعود (الكبسولة المركزية) === */
 #scroll-top-btn {
     position: fixed;
@@ -405,13 +366,12 @@ body.no-scroll {
         grid-template-columns: repeat(2, 1fr);
         gap: 10px; padding: 5px;
     }
-    
-    .whatsapp-float { bottom: 45px; right: 20px; }
-    
+
+    .whatsapp-float { right: 15px;bottom: 20px; }
+
     .footer-container { text-align: center; }
     .footer-col h3::after { right: 50%; transform: translateX(50%); }
     .footer-col ul li a:hover { padding-right: 0; }
     
-    /* توسيط أيقونات الاتصال في الموبايل */
     .contact-link { justify-content: center; }
 }
